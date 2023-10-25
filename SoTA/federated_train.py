@@ -765,29 +765,35 @@ if __name__ == '__main__':
 
     dataset = 'cifar10' ##possible datasets: cifar10, cifar100, tinyimagenet
     model = 'simple-cnn'
+    alg='moon'
+    t_round=10
     communication_rounds = 100
+    mu=8
 
     for i in range(3):
-        main(aggregation_method, 8, i, 'moon', 10, dataset, model, communication_rounds,coef)
+        main(aggregation_method, mu, i, alg, t_round, dataset, model, communication_rounds,coef)
 
 
 
     dataset='cifar100'
     model='resnet50-cifar100'
     communication_rounds=100
+    mu=5
 
 
     for i in range(3):
-        main(aggregation_method,  5, i, 'moon', 10, dataset, model, communication_rounds, coef)
+        main(aggregation_method,  mu, i, alg, t_round, dataset, model, communication_rounds, coef)
 
 
 
 
     dataset = 'tinyimagenet'
     model = 'resnet50'
+    mu=3
     communication_rounds = 20
+
     for i in range(3):
-        main(aggregation_method, 3, i, 'moon', 10, dataset, model, communication_rounds,  coef)
+        main(aggregation_method, mu, i, alg, t_round, dataset, model, communication_rounds,  coef)
 
 
 
