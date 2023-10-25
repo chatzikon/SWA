@@ -33,7 +33,7 @@ As mentioned above, employ the federated_train.py script to train the model.
 The **alg** argument is the algorithm employed, among the ones presented in [1]. The **communication rounds** are the times the server communicates with the clients. According to ablation arguments, is equal to epochs//t_round. The **mu** is the coefficient of the contrastive loss. 
 The rest of the arguments were explained above, at the ablation study part. 
 
-The code from [MOON](https://github.com/QinbinLi/MOON) was used. Thus, extra information for the ablation part can also be found at the aforementioned github.
+The code from [MOON](https://github.com/QinbinLi/MOON) was used and transformed to fit the needs of this work. Thus, extra information for the ablation part can also be found at the aforementioned github.
 
 
 [1] Li, Q., He, B., & Song, D. (2021). Model-contrastive federated learning. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition (pp. 10713-10722).
