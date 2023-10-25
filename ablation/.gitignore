@@ -1,0 +1,6 @@
+﻿CifarTrainData/
+__pycache__/
+runs/
+saved_models/
+SaveModel/
+
