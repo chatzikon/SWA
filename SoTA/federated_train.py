@@ -93,151 +93,6 @@ def save_model_hos(model,list_name,client):
 
 
 
-def cumulants_filter_prune(temp_load_numpy, n_clients, temp_filter_cumulants,coef):
-    temp = np.asarray(temp_load_numpy)
-
-    if temp_load_numpy[0].ndim == 4 or temp_load_numpy[0].ndim == 2:
-
-
-        if temp_load_numpy[0].ndim == 4:
-            sz=temp_load_numpy[0].shape[1]*temp_load_numpy[0].shape[2]*temp_load_numpy[0].shape[3]
-        else:
-            sz = temp_load_numpy[0].shape[1]
-
-        x=np.linspace(-1,1,sz)
-        prob_g = stats.norm.pdf(x, 0, 1)
-
-        ###
-        temp_filter_cumulants = np.zeros((temp.shape[1], n_clients))
-        ###
-
-        temp_load_numpy_server = np.empty_like(temp_load_numpy[0])
-
-        for i in range(np.shape(temp_load_numpy[0])[0]):
-
-            cumulants_temp = []
-            for client in range(n_clients):
-                if temp_load_numpy[0].ndim == 4:
-
-                    if coef == 'KL':
-
-                        prob = softmax(temp_load_numpy[client][i, :, :, :].flatten())
-
-                        cumulants_temp.append(stats.entropy(prob + 1e-10, prob_g + 1e-10))
-
-
-
-
-
-
-
-                    elif coef == 'R0':
-
-                        alpha = 0
-                        prob = softmax(temp_load_numpy[client][i, :, :, :].flatten())
-
-                        cumulants_temp.append(np.abs((1 / (alpha - 1)) * math.log(
-                            sum([prob[i] ** alpha * prob_g[i] ** (1 - alpha) for i in range(len(prob))]))))
-
-
-                    elif coef == 'BH':
-
-                        alpha = 1 / 2
-                        prob = softmax(temp_load_numpy[client][i, :, :, :].flatten())
-
-                        cumulants_temp.append(np.abs((1 / (alpha - 1)) * math.log(
-                            sum([prob[i] ** alpha * prob_g[i] ** (1 - alpha) for i in range(len(prob))]))))
-
-                    elif coef == 'R2':
-
-                        alpha = 2
-                        prob = softmax(temp_load_numpy[client][i, :, :, :].flatten())
-
-                        cumulants_temp.append(np.abs((1 / (alpha - 1)) * math.log(
-                            sum([prob[i] ** alpha * prob_g[i] ** (1 - alpha) for i in range(len(prob))]))))
-
-
-
-                    else:
-
-                        cumulants_temp.append(abs(stats.kstat(temp_load_numpy[client][i, :, :, :], 4) * stats.kstat(
-                            temp_load_numpy[client][i, :, :, :], 3)))
-
-                else:
-                    if coef == 'KL':
-
-                        prob = softmax(temp_load_numpy[client][i, :].flatten())
-
-                        cumulants_temp.append(stats.entropy(prob + 1e-10, prob_g + 1e-10))
-
-
-
-
-
-
-                    elif coef == 'R0':
-
-                        alpha = 0
-                        prob = softmax(temp_load_numpy[client][i, :].flatten())
-
-                        cumulants_temp.append(np.abs((1 / (alpha - 1)) * math.log(
-                            sum([prob[i] ** alpha * prob_g[i] ** (1 - alpha) for i in range(len(prob))]))))
-
-
-                    elif coef == 'BH':
-
-                        alpha = 1 / 2
-                        prob = softmax(temp_load_numpy[client][i, :].flatten())
-
-                        cumulants_temp.append(np.abs((1 / (alpha - 1)) * math.log(
-                            sum([prob[i] ** alpha * prob_g[i] ** (1 - alpha) for i in range(len(prob))]))))
-
-                    elif coef == 'R2':
-
-                        alpha = 2
-                        prob = softmax(temp_load_numpy[client][i, :].flatten())
-
-                        cumulants_temp.append(np.abs((1 / (alpha - 1)) * math.log(
-                            sum([prob[i] ** alpha * prob_g[i] ** (1 - alpha) for i in range(len(prob))]))))
-
-
-                    else:
-
-                        cumulants_temp.append(abs(stats.kstat(temp_load_numpy[client][i, :], 4) * stats.kstat(temp_load_numpy[client][i, :],
-                                                                                        3)))
-
-
-            temp_filter_cumulants[i, :] = cumulants_temp
-
-            if temp_load_numpy[0].ndim == 4:
-
-                temp_load_numpy_server[i, :, :, :] = np.average(temp[:, i, :, :, :], 0, temp_filter_cumulants[i, :])
-
-
-
-
-            else:
-
-                temp_load_numpy_server[i, :] = np.average(temp[:, i, :], 0, temp_filter_cumulants[i, :])
-
-
-
-
-
-    elif temp_load_numpy[0].ndim == 1:
-
-        temp_load_numpy_server = np.empty_like(temp_load_numpy[0])
-
-        for i in range(np.shape(temp_load_numpy[0])[0]):
-            temp_load_numpy_server[i] = np.average(temp[:, i], 0, temp_filter_cumulants[i, :])
-
-
-
-    elif temp_load_numpy[0].ndim == 0:
-
-        temp_load_numpy_server = np.average(temp, 0, np.average(temp_filter_cumulants, 0))
-
-    return temp_load_numpy_server, temp_filter_cumulants
 
 
 def cumulants_layer_prune(temp_load_numpy, n_clients, temp_filter_cumulants,coef):
@@ -329,42 +184,6 @@ def cumulants_layer_prune_fl(temp_load_numpy, n_clients):
     return  weight_avg
 
 
-def cumulants_filter_prune_fl(temp_load_numpy, n_clients):
-    temp = np.asarray(temp_load_numpy)
-
-
-
-    ###
-    temp_filter_cumulants = np.zeros((temp.shape[1], n_clients))
-    ###
-
-
-
-
-    for i in range(np.shape(temp_load_numpy[0])[0]):
-
-        cumulants_temp = []
-        for client in range(n_clients):
-            if temp_load_numpy[0].ndim == 4:
-                cumulants_temp.append(abs(stats.kstat(temp_load_numpy[client][i, :, :, :], 4) * stats.kstat(
-                    temp_load_numpy[client][i, :, :, :], 3)))
-            else:
-                cumulants_temp.append(
-                    abs(stats.kstat(temp_load_numpy[client][i, :], 4) * stats.kstat(temp_load_numpy[client][i, :],
-                                                                                    3)))
-
-
-        max_value = max(cumulants_temp)
-
-        temp_filter_cumulants[i, :] = cumulants_temp/max_value
-
-
-
-
-
-
-
-    return  temp_filter_cumulants
 
 
 
@@ -405,17 +224,7 @@ def load_model_hos(model, list_name, n_clients, aggregation_method, coef):
 
 
 
-        elif aggregation_method == 'cumulants_filter_prune':
 
-            temp_load_numpy_server, weight_avg = cumulants_filter_prune(temp_load_numpy, n_clients, weight_avg,coef)
-
-
-
-        elif aggregation_method == 'cumulants_fillayer_prune':
-
-            weight_avg_l = cumulants_layer_prune_fl(temp_load_numpy, n_clients, weight_avg_l)
-
-            weight_avg_f = cumulants_filter_prune_fl(temp_load_numpy, n_clients, weight_avg_f)
 
 
 
