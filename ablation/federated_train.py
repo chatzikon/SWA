@@ -58,31 +58,29 @@ def seed_everything(SEED):
     os.environ['PYTHONHASHSEED'] = str(SEED)
 
 
-def save_checkpoint(state, is_best, counter, aggregation_method, weighted, n_clients, filepath):
+def save_checkpoint(state, is_best, counter, aggregation_method, n_clients, filepath):
     torch.save(state, os.path.join(filepath, 'checkpoint.pth.tar'))
     if is_best:
         shutil.copyfile(os.path.join(filepath, 'checkpoint.pth.tar'), os.path.join(filepath,
                                                                                    'model_best_test_acc_' + str(
                                                                                        counter) + '_' + str(
                                                                                        state['best_prec']) + '_' + str(
-                                                                                       aggregation_method) + '_weighted=' + str(
-                                                                                       weighted) +
+                                                                                       aggregation_method)  +
                                                                                    '_n_clients=' + str(
                                                                                        n_clients) + '.pth.tar'))
 
 
-def save_checkpoint_srv(state, is_best, counter, aggregation_method, weighted, checkpoint_prev, n_clients,  filepath):
+def save_checkpoint_srv(state, is_best, counter, aggregation_method,  checkpoint_prev, n_clients,  filepath):
     torch.save(state, os.path.join(filepath, 'checkpoint_srv.pth.tar'))
     if is_best:
         shutil.copyfile(os.path.join(filepath, 'checkpoint_srv.pth.tar'),
                         os.path.join(filepath, 'model_best_test_acc_' + str(
                             counter) + '_' + str(state['best_prec']) + '_' + str(
-                            aggregation_method) + '_weighted=' + str(
-                            weighted) + '_n_clients=' + str(n_clients) + '.pth.tar'))
+                            aggregation_method) + '_n_clients=' + str(n_clients) + '.pth.tar'))
         if checkpoint_prev != 0:
             os.remove(checkpoint_prev)
         checkpoint_prev = os.path.join(filepath, 'model_best_test_acc_' + str(counter) + '_' + str(
-            state['best_prec']) + '_' + str(aggregation_method) + '_weighted=' + str(weighted) + '_n_clients=' + str(
+            state['best_prec']) + '_' + str(aggregation_method) + '_n_clients=' + str(
             n_clients) + '.pth.tar')
 
     return checkpoint_prev
@@ -99,29 +97,28 @@ def load_checkpoint_srv(filepath):
     return checkpoint
 
 
-def load_checkpoint(best, counter, aggregation_method, weighted, n_clients, filepath):
+def load_checkpoint(best, counter, aggregation_method, n_clients, filepath):
     if os.path.isfile(os.path.join(filepath, 'model_best_test_acc_' + str(counter) + '_' + str(best) + '_' + str(
-            aggregation_method) + '_weighted=' + str(weighted) +
+            aggregation_method)+
                                              '_n_clients=' + str(n_clients) + '.pth.tar')):
         print("=> loading checkpoint '{}'".format(os.path.join(filepath,
                                                                'model_best_test_acc_' + str(counter) + '_' + str(
                                                                    best) + '_' + str(
-                                                                   aggregation_method) + '_weighted=' + str(weighted) +
+                                                                   aggregation_method)  +
                                                                '_n_clients=' + str(n_clients) + '.pth.tar')))
         checkpoint = torch.load(os.path.join(filepath,
                                              'model_best_test_acc_' + str(counter) + '_' + str(best) + '_' + str(
-                                                 aggregation_method) + '_weighted=' + str(weighted) +
+                                                 aggregation_method) +
                                              '_n_clients=' + str(n_clients) + '.pth.tar'))
         print("=> loaded checkpoint '{}'  Prec1: {:f}".format(os.path.join(filepath, 'model_best_test_acc_' + str(
-            counter) + '_' + str(best) + '_' + str(aggregation_method) + '_weighted=' + str(weighted) +
+            counter) + '_' + str(best) + '_' + str(aggregation_method) +
                                                                            '_n_clients=' + str(n_clients) + '.pth.tar'),
                                                               best))
     else:
         print("=> no checkpoint found at '{}'".format(os.path.join(filepath,
                                                                    'model_best_test_acc_' + str(counter) + '_' + str(
                                                                        best) + '_' + str(
-                                                                       aggregation_method) + '_weighted=' + str(
-                                                                       weighted) +
+                                                                       aggregation_method) +
                                                                    '_n_clients=' + str(n_clients) + '.pth.tar')))
     return checkpoint
 
@@ -551,7 +548,7 @@ def test(model, test_loader):
     return loss.item(), float(correct) / float(len(test_loader.sampler))
 
 
-def main(aggregation_method, total_epochs, weighted, evaluate, path, splits, t_round, wd, normalization, n_clients,seed, coef,count,dataset):
+def main(aggregation_method, total_epochs, evaluate, path, splits, t_round, wd, normalization, n_clients,seed, coef,count,dataset):
     writer = SummaryWriter(log_dir='runs')
 
     seed_everything(seed)
@@ -755,7 +752,7 @@ def main(aggregation_method, total_epochs, weighted, evaluate, path, splits, t_r
             'state_dict': model.state_dict(),
             'best_prec': prec_server,
             'optimizer': 0,
-        }, is_best, str(count)+'_'+str(round_n + 1), aggregation_method, weighted, checkpoint_prev, n_clients, filepath=save_path)
+        }, is_best, str(count)+'_'+str(round_n + 1), aggregation_method,checkpoint_prev, n_clients, filepath=save_path)
 
         print('The precision of the server is ' + str(prec_server))
 
@@ -766,7 +763,7 @@ def main(aggregation_method, total_epochs, weighted, evaluate, path, splits, t_r
 
     model.cuda()
 
-    checkpoint = load_checkpoint(best_prec, str(count)+'_'+str(best_round), aggregation_method, weighted, n_clients, save_path)
+    checkpoint = load_checkpoint(best_prec, str(count)+'_'+str(best_round), aggregation_method,  n_clients, save_path)
 
     model.load_state_dict(checkpoint['state_dict'])
 
@@ -777,7 +774,7 @@ def main(aggregation_method, total_epochs, weighted, evaluate, path, splits, t_r
         'state_dict': model.state_dict(),
         'best_prec': prec_server,
         'optimizer': 0,
-    }, True, 'test_result_'+str(count), aggregation_method, weighted, n_clients, filepath=save_path)
+    }, True, 'test_result_'+str(count), aggregation_method,  n_clients, filepath=save_path)
 
     print('The precision of the server at test set is ' + str(prec_server))
 
@@ -789,7 +786,6 @@ if __name__ == '__main__':
     path = ''
 
 
-    weighted = True
 
     wd_factor = 1e-4
     dataset='cifar100'   ##possible datasets: cifar10, cifar100
@@ -821,7 +817,7 @@ if __name__ == '__main__':
         aggregation_method = 'cumulants_filter_prune' #aggregation method can also be the baseline average method (avg)
 
 
-        main(aggregation_method, epochs, weighted, False, path, splits, t_round,wd_factor,normalization,clients,j,coef,count,dataset)
+        main(aggregation_method, epochs,False, path, splits, t_round,wd_factor,normalization,clients,j,coef,count,dataset)
         count+=1
 
 
