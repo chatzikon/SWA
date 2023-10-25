@@ -951,10 +951,10 @@ def local_train_net(nets, args, net_dataidx_map,list_name, train_dl=None, test_d
 
 if __name__ == '__main__':
 
-    coef = 'k3k4'
-    aggregation_method = 'cumulants_layer_prune'
+    coef = 'k3k4'#can also be R0, Kl (R1), BH (R0.5), R2
+    aggregation_method = 'cumulants_layer_prune'#aggregation method can also be the baseline average method (avg)
 
-    dataset = 'cifar10'
+    dataset = 'cifar10' ##possible datasets: cifar10, cifar100, tinyimagenet
     model = 'simple-cnn'
     communication_rounds = 100
 
@@ -969,7 +969,6 @@ if __name__ == '__main__':
 
 
     for i in range(3):
-        aggregation_method = 'cumulants_layer_prune'
         main(aggregation_method,  5, i, 'moon', 10, dataset, model, communication_rounds, coef)
 
 

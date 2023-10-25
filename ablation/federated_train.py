@@ -818,7 +818,7 @@ if __name__ == '__main__':
         for i in range(clients):
             splits.append(0.099 / clients)
 
-        aggregation_method = 'cumulants_filter_prune' #aggregation method can also be the baseline average method
+        aggregation_method = 'cumulants_filter_prune' #aggregation method can also be the baseline average method (avg)
 
 
         main(aggregation_method, epochs, weighted, False, path, splits, t_round,wd_factor,normalization,clients,j,coef,count,dataset)
