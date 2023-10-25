@@ -14,6 +14,7 @@ Run pip install -r equirements.txt to install the required packages
 
 # **Train**
 
+The folder ablation contains the files required to perform the ablation study described in the paper.
 
 # **License**
 
